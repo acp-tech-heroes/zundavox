@@ -1,4 +1,5 @@
 FROM ubuntu:focal AS build
+RUN pip install --upgrade pip
 RUN apt update && \
  DEBIAN_FRONTEND=noninteractive apt -y install wget unzip tar && \
  mkdir -p /voicevox_engine && \
@@ -10,6 +11,7 @@ RUN apt update && \
  mv onnxruntime-linux-arm64-cpu-v1.10.0 /voicevox_engine
 
 FROM ubuntu:focal
+RUN pip install --upgrade pip
 RUN apt update && \
  DEBIAN_FRONTEND=noninteractive apt -y install git pip python3 python3-dev python3-wheel cmake g++ libsndfile1 && \
  git clone -b 0.11.4 https://github.com/VOICEVOX/voicevox_engine.git && \
