@@ -1,7 +1,7 @@
 FROM ubuntu:focal AS build
-RUN pip install --upgrade pip
 RUN apt update && \
- DEBIAN_FRONTEND=noninteractive apt -y install wget unzip tar && \
+ DEBIAN_FRONTEND=noninteractive apt -y install wget unzip tar python3-pip && \
+ pip install --upgrade pip && \
  mkdir -p /voicevox_engine && \
  wget https://github.com/VOICEVOX/voicevox_core/releases/download/0.11.4/core.zip && \
  unzip core.zip && \
@@ -11,9 +11,9 @@ RUN apt update && \
  mv onnxruntime-linux-arm64-cpu-v1.10.0 /voicevox_engine
 
 FROM ubuntu:focal
-RUN pip install --upgrade pip
 RUN apt update && \
- DEBIAN_FRONTEND=noninteractive apt -y install git pip python3 python3-dev python3-wheel cmake g++ libsndfile1 && \
+ DEBIAN_FRONTEND=noninteractive apt -y install git python3-pip python3 python3-dev python3-wheel cmake g++ libsndfile1 && \
+ pip install --upgrade pip && \
  git clone -b 0.11.4 https://github.com/VOICEVOX/voicevox_engine.git && \
  cd voicevox_engine/ && \
  pip install -r requirements.txt -r requirements-test.txt
