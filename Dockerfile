@@ -1,22 +1,33 @@
 FROM ubuntu:focal AS build
-RUN apt update && \
- DEBIAN_FRONTEND=noninteractive apt -y install wget unzip tar python3-pip && \
- pip install --upgrade pip && \
- mkdir -p /voicevox_engine && \
- wget https://github.com/VOICEVOX/voicevox_core/releases/download/0.11.4/core.zip && \
- unzip core.zip && \
- mv core /voicevox_engine && \
- wget https://github.com/VOICEVOX/onnxruntime-builder/releases/download/1.10.0.1/onnxruntime-linux-arm64-cpu-v1.10.0.tgz && \
- tar xzvf onnxruntime-linux-arm64-cpu-v1.10.0.tgz && \
- mv onnxruntime-linux-arm64-cpu-v1.10.0 /voicevox_engine
+# 必要なパッケージのインストール
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt -y install \
+    wget unzip tar python3-pip python3-dev g++ libsndfile1-dev libasound2-dev libatlas-base-dev libjack-jackd2-dev
+
+# pipとCythonのアップグレード
+RUN pip install --upgrade pip && pip install Cython==0.29.23
+
+# VOICEVOXのコアとONNX Runtimeのダウンロードと設定
+RUN mkdir -p /voicevox_engine && \
+    wget https://github.com/VOICEVOX/voicevox_core/releases/download/0.11.4/core.zip && \
+    unzip core.zip && \
+    mv core /voicevox_engine && \
+    wget https://github.com/VOICEVOX/onnxruntime-builder/releases/download/1.10.0.1/onnxruntime-linux-arm64-cpu-v1.10.0.tgz && \
+    tar xzvf onnxruntime-linux-arm64-cpu-v1.10.0.tgz && \
+    mv onnxruntime-linux-arm64-cpu-v1.10.0 /voicevox_engine
 
 FROM ubuntu:focal
-RUN apt update && \
- DEBIAN_FRONTEND=noninteractive apt -y install git python3-pip python3 python3-dev python3-wheel cmake g++ libsndfile1 && \
- pip install --upgrade pip && \
- git clone -b 0.11.4 https://github.com/VOICEVOX/voicevox_engine.git && \
- cd voicevox_engine/ && \
- pip install -r requirements.txt -r requirements-test.txt
+# 必要なパッケージのインストール
+RUN apt update && DEBIAN_FRONTEND=noninteractive apt -y install \
+    git python3 python3-dev python3-wheel cmake g++ libsndfile1
+
+# pipとCythonのアップグレード
+RUN pip install --upgrade pip && pip install Cython==0.29.23
+
+# VOICEVOXエンジンのクローン
+RUN git clone -b 0.11.4 https://github.com/VOICEVOX/voicevox_engine.git && \
+    cd voicevox_engine/ && \
+    pip install -r requirements.txt -r requirements-test.txt
+
 COPY --from=build /voicevox_engine /voicevox_engine
 ENV VV_CPU_NUM_THREADS=4
 
